@@ -1,0 +1,31 @@
+# Arquivos da IDE
+.idea/
+*.iml
+.classpath
+.project
+
+# Arquivos compilados
+/target/
+/out/
+
+# Arquivos de configuração específicos do ambiente
+application-local.properties
+application-prod.properties
+
+# Arquivos temporários do sistema operacional
+*.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Dependências
+/node_modules/
+
+# Arquivos do Maven
+.mvn/
+m2e-workspace
+
+# Arquivos específicos do editor
+*.swc
+*.swo
