@@ -6,7 +6,11 @@
 
 # Arquivos compilados
 /target/
+/api-gateway/target/
+/chatbot-service/target/
 /out/
+/api-gateway/out/
+/chatbot-service/out/
 
 # Arquivos de configuração específicos do ambiente
 application-local.properties
