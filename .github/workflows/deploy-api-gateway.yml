@@ -75,5 +75,5 @@ jobs:
           script: |
             docker stop chatbot-container || true
             docker rm chatbot-container || true
-            docker pull ${{ secrets.ECR_REPOSITORY_NAME }}:latest
-            docker run -d --name chatbot-container -p 8080:8080 ${{ secrets.ECR_REPOSITORY_NAME }}:latest
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+            docker run -d --name chatbot-container -p 8080:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
