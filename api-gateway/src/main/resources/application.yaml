@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: actuator-health
+          uri: lb://urbana-do-brasil-loadbalancer-209012029.us-east-2.elb.amazonaws.com
+          predicates:
+            - Path=/actuator/health/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
