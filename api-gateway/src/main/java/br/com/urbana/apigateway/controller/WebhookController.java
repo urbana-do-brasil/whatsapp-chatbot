@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -30,8 +31,8 @@ public class WebhookController {
     }
 
     @PostMapping("/webhook")
-    public Mono<ResponseEntity<String>> webhook(@RequestBody Map<String, Object> payload, ServerHttpRequest request) {
-        return Mono.fromRunnable(() -> webhookInputPort.handleWebhook(request, payload))
+    public Mono<ResponseEntity<String>> webhook(@RequestBody Map<String, Object> payload, ServerWebExchange exchange) {
+        return Mono.fromRunnable(() -> webhookInputPort.handleWebhook(exchange.getRequest(), payload))
             .thenReturn(ResponseEntity.ok().build());
     }
 
