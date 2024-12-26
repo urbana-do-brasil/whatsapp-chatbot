@@ -1,12 +1,12 @@
 package br.com.urbana.apigateway.controller;
 
 import br.com.urbana.apigateway.core.inbound.WebhookInputPort;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -30,8 +30,8 @@ public class WebhookController {
     }
 
     @PostMapping("/webhook")
-    public Mono<ResponseEntity<String>> webhook(@RequestBody Map<String, Object> payload) {
-        return Mono.fromRunnable(() -> webhookInputPort.handleWebhook(payload))
+    public Mono<ResponseEntity<String>> webhook(@RequestBody Map<String, Object> payload, ServerHttpRequest request) {
+        return Mono.fromRunnable(() -> webhookInputPort.handleWebhook(request, payload))
             .thenReturn(ResponseEntity.ok().build());
     }
 

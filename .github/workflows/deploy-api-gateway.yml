@@ -30,6 +30,7 @@ jobs:
           docker build \
             --build-arg whatsapp_verify_token=${{ secrets.WHATSAPP_VERIFY_TOKEN }} \
             --build-arg whatsapp_graph_api_token=${{ secrets.WHATSAPP_GRAPH_API_TOKEN }} \
+            --build-arg whatsapp_app_secret=${{ secrets.WHATSAPP_APP_SECRET }} \
             -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:${{ github.sha }} .
           docker tag ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:${{ github.sha }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
 
