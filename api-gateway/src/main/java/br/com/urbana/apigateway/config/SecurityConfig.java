@@ -15,6 +15,7 @@ public class SecurityConfig {
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
             .authorizeExchange(exchanges -> exchanges
                 .pathMatchers("/webhook").permitAll()
+                .pathMatchers("/actuator/health/**").permitAll()
                 .anyExchange().authenticated()
             );
 
