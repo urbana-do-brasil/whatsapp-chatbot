@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -44,8 +45,53 @@ public class ProcessWebhookUseCase implements WebhookInputPort {
     }
 
     private WhatsAppMessage extractMessageFromPayload(Map<String, Object> payload) {
-        // Lógica para extrair a mensagem do payload complexo do WhatsApp.  Use um modelo `WhatsAppMessage`.
-        // ... (implementação) ...
-        return null; // Substitua pelo objeto WhatsAppMessage
+        try {
+            // 1. Navega até a lista de mensagens
+            List<Map<String, Object>> entries = (List<Map<String, Object>>) payload.get("entry");
+            if (entries == null || entries.isEmpty()) {
+                return null; // Ou lançar uma exceção, se apropriado
+            }
+
+            List<Map<String, Object>> changes = (List<Map<String, Object>>) entries.get(0).get("changes");
+            if (changes == null || changes.isEmpty()) {
+                return null;
+            }
+
+            Map<String, Object> value = (Map<String, Object>) changes.get(0).get("value");
+            if (value == null ) {
+                return null;
+            }
+
+            List<Map<String, Object>> messages = (List<Map<String, Object>>) value.get("messages");
+            if (messages == null || messages.isEmpty()) {
+                return null;
+            }
+
+            // 2. Extrai os dados da mensagem
+            Map<String, Object> messageData = messages.get(0);
+
+            // 3. Cria o objeto WhatsAppMessage
+            WhatsAppMessage message = new WhatsAppMessage();
+            message.setId((String) messageData.get("id"));
+            message.setType((String) messageData.get("type"));
+            message.setFrom((String) messageData.get("from"));
+            message.setTimestamp((String) messageData.get("timestamp"));
+
+            // 4. Extrai o conteúdo da mensagem de texto (se aplicável)
+            if (message.getType().equals("text")) {
+                Map<String, Object> textData = (Map<String, Object>) messageData.get("text");
+                WhatsAppMessage.TextMessageContent textContent = new WhatsAppMessage.TextMessageContent();
+                textContent.setBody((String) textData.get("body"));
+                message.setText(textContent);
+
+            }
+            // 5. Retorna o objeto WhatsAppMessage
+            return message;
+
+        } catch (ClassCastException | NullPointerException e) {
+            // Trate as exceções adequadamente (log, relançar uma exceção mais específica, etc.)
+            log.error("Erro ao extrair mensagem do payload: {} Payload: {}", e.getMessage(), payload);
+            return null; // Ou lançar uma exceção
+        }
     }
 }
