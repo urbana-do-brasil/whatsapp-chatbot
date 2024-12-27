@@ -6,16 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 @Slf4j
 @RestController
 public class WebhookController {
+
+    private static final String X_HUB_SIGNATURE_256 = "X-Hub-Signature-256";
 
     @Value("${whatsapp.verify_token}")
     private String webhookVerifyToken;
@@ -31,8 +29,8 @@ public class WebhookController {
     }
 
     @PostMapping("/webhook")
-    public Mono<ResponseEntity<String>> webhook(@RequestBody Map<String, Object> payload, ServerWebExchange exchange) {
-        return Mono.fromRunnable(() -> webhookInputPort.handleWebhook(exchange.getRequest(), payload))
+    public Mono<ResponseEntity<String>> webhook(@RequestBody String payloadString, @RequestHeader(X_HUB_SIGNATURE_256) String signature) {
+        return Mono.fromRunnable(() -> webhookInputPort.handleWebhook(signature, payloadString))
             .thenReturn(ResponseEntity.ok().build());
     }
 

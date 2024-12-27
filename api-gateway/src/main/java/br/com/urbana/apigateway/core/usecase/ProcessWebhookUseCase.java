@@ -7,9 +7,7 @@ import br.com.urbana.apigateway.model.WhatsAppMessage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
@@ -25,14 +23,14 @@ public class ProcessWebhookUseCase implements WebhookInputPort {
     private final SignatureVerifier signatureVerifier;
 
     @Override
-    public Mono<Void> handleWebhook(ServerHttpRequest request, @RequestBody Map<String, Object> payload) {
-        log.info("Mensagem recebida via Webhook: {}", payload);
+    public Mono<Void> handleWebhook(String signature, String payloadString) {
+        log.info("Mensagem recebida via Webhook: {}", payloadString);
 
-        if (!signatureVerifier.verifySignature(request, payload)) {
+        if (!signatureVerifier.verifySignature(signature, payloadString)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Assinatura inválida");
         }
 
-        processMessage(payload);
+        // processMessage(payload);
 
         return Mono.empty();
     }
