@@ -22,16 +22,6 @@ public class SignatureVerifier {
     @Value("${whatsapp.app_secret}")
     private String appSecret;
 
-    private final HMac hmac;
-
-    public SignatureVerifier() {
-        Security.addProvider(new BouncyCastleProvider());
-        hmac = new HMac(new SHA256Digest());
-
-        KeyParameter keyParameter = new KeyParameter(appSecret.getBytes(StandardCharsets.UTF_8));
-        hmac.init(keyParameter);
-    }
-
     public boolean verifySignature(String signature, String payloadString) {
         log.info("Assinatura recebida pelo WhatsApp - {}", signature);
         if (!StringUtils.hasText(signature) || !signature.startsWith(PREFIX_SHA256)) {
@@ -41,27 +31,25 @@ public class SignatureVerifier {
 
         String receivedSignature = signature.substring(PREFIX_SHA256.length());
 
-        String calculatedSignature = calculateHMACSHA256(payloadString);
+        String calculatedSignature = calculateHMACSHA256(payloadString, appSecret);
         log.info("Assinatura HMAC-SHA256 - {}", calculatedSignature);
 
         return receivedSignature.equals(calculatedSignature);
     }
 
-    private String calculateHMACSHA256(String payloadString) {
-        try {
-            byte[] payloadBytes = payloadString.getBytes(StandardCharsets.UTF_8);
+    private String calculateHMACSHA256(String payloadString, String appSecret) {
+        Security.addProvider(new BouncyCastleProvider());
 
-            hmac.reset();
-            hmac.update(payloadBytes, 0, payloadBytes.length);
+        byte[] keyBytes = appSecret.getBytes(StandardCharsets.UTF_8);
+        byte[] payloadBytes = payloadString.getBytes(StandardCharsets.UTF_8);
 
-            byte[] hmacBytes = new byte[hmac.getMacSize()];
-            hmac.doFinal(hmacBytes, 0);
+        HMac hmac = new HMac(new SHA256Digest());
+        hmac.init(new KeyParameter(keyBytes));
+        hmac.update(payloadBytes, 0, payloadBytes.length);
 
-            return Hex.encodeHexString(hmacBytes);
+        byte[] hmacBytes = new byte[hmac.getMacSize()];
+        hmac.doFinal(hmacBytes, 0);
 
-        } catch (Exception e) {
-            log.error("Erro ao calcular HMAC-SHA256: {}", e.getMessage());
-            return null;
-        }
+        return Hex.encodeHexString(hmacBytes);
     }
 }
