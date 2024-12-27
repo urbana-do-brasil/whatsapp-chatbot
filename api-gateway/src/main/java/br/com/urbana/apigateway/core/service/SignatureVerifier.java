@@ -19,14 +19,15 @@ import java.util.Map;
 @Component
 public class SignatureVerifier {
 
-    private static final String X_HUB_SIGNATURE_25519 = "X-Hub-Signature-25519";
+    private static final String X_HUB_SIGNATURE_256 = "X-Hub-Signature-256";
     public static final String PREFIX_SHA256 = "sha256=";
 
     @Value("${whatsapp.app_secret}")
     private String appSecret;
 
     public boolean verifySignature(ServerHttpRequest request, Map<String, Object> payload) {
-        String signatureHeader = request.getHeaders().getFirst(X_HUB_SIGNATURE_25519);
+        log.info("Headers do request - {}", request.getHeaders());
+        String signatureHeader = request.getHeaders().getFirst(X_HUB_SIGNATURE_256);
 
         if (!StringUtils.hasText(signatureHeader) || !signatureHeader.startsWith(PREFIX_SHA256)) {
             log.error("Assinatura inválida - {}", signatureHeader);
