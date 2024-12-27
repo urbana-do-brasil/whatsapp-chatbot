@@ -23,6 +23,7 @@ public class SignatureVerifier {
     private String appSecret;
 
     public boolean verifySignature(String signature, String payloadString) {
+        log.info("Assinatura recebida pelo WhatsApp - {}", signature);
         if (!StringUtils.hasText(signature) || !signature.startsWith(PREFIX_SHA256)) {
             log.error("Assinatura inválida - {}", signature);
             return false;
