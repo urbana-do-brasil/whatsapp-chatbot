@@ -19,32 +19,32 @@ import java.util.Map;
 @Component
 public class SignatureVerifier {
 
+    private static final String X_HUB_SIGNATURE_25519 = "X-Hub-Signature-25519";
+    public static final String PREFIX_SHA256 = "sha256=";
+
     @Value("${whatsapp.app_secret}")
     private String appSecret;
 
     public boolean verifySignature(ServerHttpRequest request, Map<String, Object> payload) {
-        String signatureHeader = request.getHeaders().getFirst("X-Hub-Signature-25519");
+        String signatureHeader = request.getHeaders().getFirst(X_HUB_SIGNATURE_25519);
 
-        if (!StringUtils.hasText(signatureHeader) || !signatureHeader.startsWith("sha256=")) {
-            return false; // Cabeçalho de assinatura ausente ou inválido
+        if (!StringUtils.hasText(signatureHeader) || !signatureHeader.startsWith(PREFIX_SHA256)) {
+            return false;
         }
 
-        String receivedSignature = signatureHeader.substring("sha256=".length());
+        String receivedSignature = signatureHeader.substring(PREFIX_SHA256.length());
 
-        // Calcular o HMAC-SHA256 do payload com o App Secret
         String calculatedSignature = calculateHMACSHA256(payload, appSecret);
+        log.info("Assinatura HMAC-SHA256 - {}", calculatedSignature);
 
-        // Comparar as assinaturas (em Base64)
         return receivedSignature.equals(calculatedSignature);
     }
 
     private String calculateHMACSHA256(Map<String, Object> payload, String appSecret) {
         try {
-            // Converter o payload para String (JSON)
             ObjectMapper objectMapper = new ObjectMapper();
             String payloadString = objectMapper.writeValueAsString(payload);
 
-            // Converter o App Secret para byte array
             byte[] secretBytes = Base64.getDecoder().decode(appSecret);
 
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -53,7 +53,6 @@ public class SignatureVerifier {
 
             byte[] hmacBytes = mac.doFinal(payloadString.getBytes());
 
-            // Retorna a assinatura em Base64
             return Base64.getEncoder().encodeToString(hmacBytes);
 
         } catch (NoSuchAlgorithmException | InvalidKeyException | JsonProcessingException e) {
