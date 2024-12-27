@@ -1,16 +1,17 @@
 package br.com.urbana.apigateway.core.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+import java.security.Security;
 
 @Slf4j
 @Component
@@ -38,18 +39,18 @@ public class SignatureVerifier {
     }
 
     private String calculateHMACSHA256(String payloadString, String appSecret) {
-        try {
-            Mac mac = Mac.getInstance(ENCODING_ALGORITHM);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(appSecret.getBytes(), ENCODING_ALGORITHM);
-            mac.init(secretKeySpec);
+        Security.addProvider(new BouncyCastleProvider());
 
-            byte[] hmacBytes = mac.doFinal(payloadString.getBytes(StandardCharsets.UTF_8));
+        byte[] keyBytes = appSecret.getBytes(StandardCharsets.UTF_8);
+        byte[] payloadBytes = payloadString.getBytes(StandardCharsets.UTF_8);
 
-            return Base64.getEncoder().encodeToString(hmacBytes);
+        HMac hmac = new HMac(new SHA256Digest());
+        hmac.init(new KeyParameter(keyBytes));
+        hmac.update(payloadBytes, 0, payloadBytes.length);
 
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            log.error("Erro ao calcular HMAC-SHA256: {}", e.getMessage());
-            return null;
-        }
+        byte[] hmacBytes = new byte[hmac.getMacSize()];
+        hmac.doFinal(hmacBytes, 0);
+
+        return Hex.encodeHexString(hmacBytes);
     }
 }
