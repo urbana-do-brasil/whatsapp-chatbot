@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
@@ -24,18 +25,16 @@ public class ProcessWebhookUseCase implements WebhookInputPort {
     private final SignatureVerifier signatureVerifier;
 
     @Override
-    public Mono<Void> handleWebhook(ServerHttpRequest request, Map<String, Object> payload) {
+    public Mono<Void> handleWebhook(ServerHttpRequest request, @RequestBody Map<String, Object> payload) {
         log.info("Mensagem recebida via Webhook: {}", payload);
 
-        return Mono.fromSupplier(() -> {
-                if (!signatureVerifier.verifySignature(request, payload)) {
-                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Assinatura inválida");
-                }
-                
-                log.info("A mensagem recebida tem assinatura válida");
-                return payload;
-            })
-            .flatMap(validPayload -> Mono.fromRunnable(() -> processMessage(validPayload)));
+        if (!signatureVerifier.verifySignature(request, payload)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Assinatura inválida");
+        }
+
+        processMessage(payload);
+
+        return Mono.empty();
     }
 
     private void processMessage(Map<String, Object> payload) {

@@ -29,6 +29,7 @@ public class SignatureVerifier {
         String signatureHeader = request.getHeaders().getFirst(X_HUB_SIGNATURE_25519);
 
         if (!StringUtils.hasText(signatureHeader) || !signatureHeader.startsWith(PREFIX_SHA256)) {
+            log.error("Assinatura inválida - {}", signatureHeader);
             return false;
         }
 
