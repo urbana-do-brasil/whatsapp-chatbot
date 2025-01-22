@@ -33,18 +33,10 @@ jobs:
             --build-arg whatsapp_app_secret=${{ secrets.WHATSAPP_APP_SECRET }} \
             -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/api-gateway:latest .
 
-      - name: Salvar artefatos
-        uses: actions/upload-artifact@v3
-        with:
-            name: docker-image
-            path: ./api-gateway
-
       - name: Configurar gcloud CLI
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/auth@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Taggear a imagem com SHA
         run: docker tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/api-gateway:latest gcr.io/${{ secrets.GCP_PROJECT_ID }}/api-gateway:${{ github.sha }}
