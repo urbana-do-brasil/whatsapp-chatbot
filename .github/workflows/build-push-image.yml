@@ -43,6 +43,6 @@ jobs:
       
       - name: Publicar a imagem no Artifact Registry
         run: |
-          gcloud auth configure-docker us-docker.pkg.dev
+          gcloud auth configure-docker us-central1-docker.pkg.dev
           docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/api-gateway/api-gateway:latest
           docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/api-gateway/api-gateway:${{ github.sha }}
