@@ -31,7 +31,7 @@ jobs:
             --build-arg whatsapp_verify_token=${{ secrets.WHATSAPP_VERIFY_TOKEN }} \
             --build-arg whatsapp_graph_api_token=${{ secrets.WHATSAPP_GRAPH_API_TOKEN }} \
             --build-arg whatsapp_app_secret=${{ secrets.WHATSAPP_APP_SECRET }} \
-            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/api-gateway:latest .
+            -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/api-gateway/api-gateway:latest .
 
       - name: Configurar gcloud CLI
         uses: google-github-actions/auth@v2
@@ -39,7 +39,7 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Taggear a imagem com SHA
-        run: docker tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/api-gateway:latest us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/api-gateway/api-gateway:${{ github.sha }}
+        run: docker tag us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/api-gateway/api-gateway:latest us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/api-gateway/api-gateway:${{ github.sha }}
       
       - name: Publicar a imagem no Artifact Registry
         run: |
